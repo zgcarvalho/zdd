@@ -1,0 +1,53 @@
+C.3     sp3 carbon
+C.2     sp2 carbon
+C.ar    aromatic carbon
+C.1     sp carbon
+N.3     sp3 nitrogen
+N.2     sp2 nitrogen
+N.1     sp nitrogen
+O.3     sp3 oxygen
+O.2     sp2 oxygen
+S.3     sp3 sulfur
+N.ar    aromatic nitrogen
+P.3     sp3 phosphorous
+H       hydrogen
+Br      bromine
+Cl      chlorine
+F       fluorine
+I       iodine
+S.2     sp2 sulfur
+N.pl3   trigonal planar nitrogen
+LP      lone pair
+Na      sodium
+K       potassium
+Ca      calcium
+Li      lithium
+Al      aluminum
+Du      dummy
+Du.C    dummy with the weight of carbon
+Si      silicon
+N.am    amide nitrogen
+S.o     sulfoxide sulfur
+S.o2    sulfone sulfur
+N.4     sp3 positively charged nitrogen
+O.co2   oxygen in carboxylate or phosphate group
+C.cat   carbocation, used only in a guadinium group
+H.spc   hydrogen in SPC water model
+O.spc   oxygen in SPC water model
+H.t3p   hydrogen in TIP3P water model
+O.t3p   oxygen in TIP3P water model
+ANY     any atom
+HEV     heavy (non H) atom
+HET     heteroatom (N, O, S, P)
+HAL     halogen
+Mg      magnesium
+Cr.oh   hydroxy chromium
+Cr.th   chromium
+Se      selenium
+Fe      iron
+Cu      copper
+Zn      zinc
+Sn      tin
+Mo      molybdenum
+Mn      manganese
+Co.oh   hydroxy cobalt
