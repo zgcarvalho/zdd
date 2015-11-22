@@ -16,7 +16,7 @@ type Ligand struct {
 	Atoms []atom.Atom
 }
 
-func LoadMol2(fn string) {
+func LoadMol2(fn string) Ligand{
 	f, err := os.Open(fn)
 	if err != nil {
 		log.Fatal(err)
@@ -38,16 +38,24 @@ func LoadMol2(fn string) {
 		if strings.Contains(string(line), "@<TRIPOS>BOND") {
 			isAtom = false
 		}
+		if isAtom {
+			x, _ := strconv.ParseFloat(strings.TrimSpace(string(line)[16:26]), 64)
+			y, _ := strconv.ParseFloat(strings.TrimSpace(string(line)[26:36]), 64)
+			z, _ := strconv.ParseFloat(strings.TrimSpace(string(line)[36:46]), 64)
+			//TODO extrair o tipo do atomo, problema que o numero do residuo gruda no nome
+			name := ""
+			for _, v := range(atom.AtomNames) {
+				if strings.Contains(string(line)[46:56], v) {
+					name = v
+					atoms = append(atoms, atom.Atom{name, [3]float64{x, y, z}})
+					break
+				}
+			}
+		}
 		if strings.Contains(string(line), "@<TRIPOS>ATOM") {
 			isAtom = true
 		}
-		if isAtom {
-			x, _ := strconv.ParseFloat(string(line)[16:26], 64)
-			y, _ := strconv.ParseFloat(string(line)[26:36], 64)
-			z, _ := strconv.ParseFloat(string(line)[36:46], 64)
-			//TODO extrair o tipo do atomo, problema que o numero do residuo gruda no nome
-			name := string(line)[47:]
-			atoms = append(atoms, atom.Atom{name, [3]float64{x, y, z}})
-		}
 	}
+	return Ligand{fn, atoms}
+	// fmt.Println(atoms)
 }

@@ -14,127 +14,127 @@ for i in range(len(atom)):
         if atom[i] in acceptors:
             if atom[j] in acceptors:
                 #repulsive
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.1,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.02,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #Halogen-bond (repulsive?)
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         elif atom[i] in donors:
             if atom[j] in acceptors:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #repulsive
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.1,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.02,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #Halogen-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #repulsive
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.1,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.02,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         elif atom[i] in aAndD:
             if atom[j] in acceptors:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #H-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.8,4.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.6,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #Halogen-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,2.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.35,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         elif atom[i] in halogens:
             if atom[j] in acceptors:
                 #Halogen-bond (repulsive?)
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #Halogen-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,2.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.35,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #Halogen-bond
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,2.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,0.35,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #Halogen-bond (repulsive?)
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         elif atom[i] in metals:
             if atom[j] in acceptors:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #repulsive
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.1,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.02,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #Metal
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],2.4,7.0,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,1.0,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #repulsive
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.1,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.2,-0.02,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         elif atom[i] in nonpolar:
             if atom[j] in acceptors:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in donors:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in aAndD:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in halogens:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in metals:
                 #buried
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.05,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.01,1.0,10.0,1.0,1.0,1.0)
             elif atom[j] in nonpolar:
                 #non-polar
-                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.4,1.0,20.0,1.0,1.0,1.0)
+                print "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(atom[i], atom[j],3.6,0.07,1.0,10.0,1.0,1.0,1.0)
             else:
                 print "Problem: atom not founded"
         else:

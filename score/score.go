@@ -1,6 +1,7 @@
 package score
 
 import (
+	// "fmt"
 	"io"
 	"log"
 	"math"
@@ -9,6 +10,9 @@ import (
 	"strings"
 
 	"bufio"
+
+	"bitbucket.org/jgcarvalho/zdd/protein"
+	"bitbucket.org/jgcarvalho/zdd/ligand"
 )
 
 type Interaction struct {
@@ -23,7 +27,7 @@ type Interaction struct {
 	Wpenal float64
 }
 
-type Parameters []Interaction
+type Parameters map[string]Interaction
 
 func dist(coord1 [3]float64, coord2 [3]float64) float64 {
 	u := coord1[0] - coord2[0]
@@ -50,8 +54,8 @@ func LoadParams(fn string) Parameters {
 	if err != nil {
 		log.Fatal(err)
 	}
-	params := make([]Interaction, 861)
-	count := 0
+	params := make(map[string]Interaction)
+	// count := 0
 	bf := bufio.NewReader(f)
 	bf.ReadLine() //skip header
 	for {
@@ -73,12 +77,21 @@ func LoadParams(fn string) Parameters {
 		wa, _ := strconv.ParseFloat(data[6], 64)
 		wb, _ := strconv.ParseFloat(data[7], 64)
 		wpenal, _ := strconv.ParseFloat(data[8], 64)
-		params[count] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
-		count++
+		params[data[0]+"_"+data[1]] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
+		params[data[1]+"_"+data[0]] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
+		// params[count] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
+		// count++
 	}
 	return params
 }
 
-// func Score(p *protein.Protein, l *ligand.Ligand) {
-//
-// }
+func (prm Parameters)Score(p *protein.Protein, l *ligand.Ligand) float64 {
+	total := 0.0
+	for _, la := range(l.Atoms) {
+		for _, lp := range(p.Atoms) {
+			c := lp.Name + "_" +la.Name
+			total += score(dist(lp.Coord,la.Coord),prm[c].Dbest,prm[c].Alpha,prm[c].Beta,prm[c].Penal,prm[c].Wa, prm[c].Wb, prm[c].Wpenal)
+		}
+	}
+	return total
+}
