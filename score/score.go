@@ -11,13 +11,14 @@ import (
 
 	"bufio"
 
-	"bitbucket.org/jgcarvalho/zdd/protein"
 	"bitbucket.org/jgcarvalho/zdd/ligand"
+	"bitbucket.org/jgcarvalho/zdd/protein"
 )
 
 type Interaction struct {
 	A      string
 	B      string
+	Type   string
 	Dbest  float64
 	Alpha  float64
 	Beta   float64
@@ -70,27 +71,27 @@ func LoadParams(fn string) Parameters {
 			log.Fatal("Error: Unexpected long line reading", f.Name())
 		}
 		data := strings.Split(string(line), "\t")
-		d, _ := strconv.ParseFloat(data[2], 64)
-		a, _ := strconv.ParseFloat(data[3], 64)
-		b, _ := strconv.ParseFloat(data[4], 64)
-		penal, _ := strconv.ParseFloat(data[5], 64)
-		wa, _ := strconv.ParseFloat(data[6], 64)
-		wb, _ := strconv.ParseFloat(data[7], 64)
-		wpenal, _ := strconv.ParseFloat(data[8], 64)
-		params[data[0]+"_"+data[1]] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
-		params[data[1]+"_"+data[0]] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
+		d, _ := strconv.ParseFloat(data[3], 64)
+		a, _ := strconv.ParseFloat(data[4], 64)
+		b, _ := strconv.ParseFloat(data[5], 64)
+		penal, _ := strconv.ParseFloat(data[6], 64)
+		wa, _ := strconv.ParseFloat(data[7], 64)
+		wb, _ := strconv.ParseFloat(data[8], 64)
+		wpenal, _ := strconv.ParseFloat(data[9], 64)
+		params[data[0]+"_"+data[1]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
+		params[data[1]+"_"+data[0]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
 		// params[count] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
 		// count++
 	}
 	return params
 }
 
-func (prm Parameters)Score(p *protein.Protein, l *ligand.Ligand) float64 {
+func (prm Parameters) Score(p *protein.Protein, l *ligand.Ligand) float64 {
 	total := 0.0
-	for _, la := range(l.Atoms) {
-		for _, lp := range(p.Atoms) {
-			c := lp.Name + "_" +la.Name
-			total += score(dist(lp.Coord,la.Coord),prm[c].Dbest,prm[c].Alpha,prm[c].Beta,prm[c].Penal,prm[c].Wa, prm[c].Wb, prm[c].Wpenal)
+	for _, la := range l.Atoms {
+		for _, lp := range p.Atoms {
+			c := lp.Name + "_" + la.Name
+			total += score(dist(lp.Coord, la.Coord), prm[c].Dbest, prm[c].Alpha, prm[c].Beta, prm[c].Penal, prm[c].Wa, prm[c].Wb, prm[c].Wpenal)
 		}
 	}
 	return total
