@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	spsa "github.com/yanatan16/golang-spsa"
+	"bitbucket.org/jgcarvalho/zdd/ligand"
+	"bitbucket.org/jgcarvalho/zdd/protein"
+	"bitbucket.org/jgcarvalho/zdd/score"
 )
 
 type TrainData struct {
@@ -32,19 +34,26 @@ func loadData(fn string) []TrainData {
 	return traindata
 }
 
+func cost(params score.Parameters, traindata []TrainData) {
+	for i := 0; i < len(traindata); i++ {
+		protein := protein.LoadMol2(traindata[i].Receptor)
+	}
+	protein := protein.LoadMol2(*f_prot)
+	// fmt.Println(protein)
+	// ligand := ligand.LoadMol2("/home/jgcarvalho/pdbbind/core/ligands/10gs_ligand.mol2")
+	ligand := ligand.LoadMol2(*f_lig)
+	// fmt.Println(ligand)
+	total := params.Score(&protein, &ligand)
+
+}
+
+func trainMain(params score.Parameters, traindata []TrainData) {
+
+}
+
 func Train() {
 	fn, _ := filepath.Abs("./traindata/data.json")
 	traindata := loadData(fn)
 	fmt.Println(traindata)
 
-	spsa := &spsa.SPSA{
-		L:     spsa.AbsoluteSum,              // Loss Function
-		C:     spsa.NoConstraints,            // Constraint Function
-		Theta: spsa.Vector{1, 1, 1, 1, 1},    // Initial theta vector
-		Ak:    spsa.StandardAk(1, 100, .602), // a tuned, A ~= n / 10, alpha = .602
-		Ck:    spsa.StandardCk(.1, .101),     // c ~= std-dev(Loss function), gamma = .101
-		Delta: spsa.Bernoulli{1},             // Perturbation Distribution
-	}
-
-	theta := spsa.Run(1000)
 }
