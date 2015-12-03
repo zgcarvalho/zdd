@@ -52,6 +52,7 @@ func score(d, dbest, alpha, beta, penal, wa, wb, wpenal float64) float64 {
 
 func LoadParams(fn string) Parameters {
 	f, err := os.Open(fn)
+	defer f.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
