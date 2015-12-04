@@ -54,26 +54,48 @@ func loadData(fn string) []TrainData {
 
 func cost(params score.Parameters, traindata []TrainData) float64 {
 	var score float64
+	pkdchan := make(chan float64, len(traindata))
+	rankchan := make(chan float64, len(traindata))
 	pkdScore := 0.0
 	rankScore := 0.0
 	for i := 0; i < len(traindata); i++ {
-		protein := protein.LoadMol2("./traindata/" + traindata[i].Receptor)
-		pos := ligand.LoadMol2("./traindata/" + traindata[i].Positive)
-		total := params.Score(&protein, &pos)
+		go func(i int) {
+			protein := protein.LoadMol2("./traindata/" + traindata[i].Receptor)
+			pos := ligand.LoadMol2("./traindata/" + traindata[i].Positive)
+			total := params.Score(&protein, &pos)
 
-		// pkdScore += math.Abs(traindata[i].Pkd - total)
-		pkdScore += (traindata[i].Pkd - total) * (traindata[i].Pkd - total)
-
-		for j := 0; j < len(traindata[i].Negatives); j++ {
-			neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
-			negTotal := params.Score(&protein, &neg)
-			if negTotal >= total {
-				rankScore += 0.1
+			rk := 0.0
+			for j := 0; j < len(traindata[i].Negatives); j++ {
+				neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
+				negTotal := params.Score(&protein, &neg)
+				if negTotal >= total {
+					rk += 0.1
+				}
 			}
-
-		}
-
+			pkdchan <- (traindata[i].Pkd - total) * (traindata[i].Pkd - total)
+			rankchan <- rk
+		}(i)
+		// protein := protein.LoadMol2("./traindata/" + traindata[i].Receptor)
+		// pos := ligand.LoadMol2("./traindata/" + traindata[i].Positive)
+		// total := params.Score(&protein, &pos)
+		//
+		// // pkdScore += math.Abs(traindata[i].Pkd - total)
+		// pkdScore += (traindata[i].Pkd - total) * (traindata[i].Pkd - total)
+		//
+		// for j := 0; j < len(traindata[i].Negatives); j++ {
+		// 	neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
+		// 	negTotal := params.Score(&protein, &neg)
+		// 	if negTotal >= total {
+		// 		rankScore += 0.1
+		// 	}
+		// }
 	}
+
+	for i := 0; i < len(traindata); i++ {
+		pkdScore += <-pkdchan
+		rankScore += <-rankchan
+	}
+
 	rankScore = pkdScore * rankScore
 	fmt.Printf("PKD %f - Rank %f - TOTAL %f\n", pkdScore, rankScore, pkdScore+rankScore)
 	score = pkdScore + rankScore
@@ -234,7 +256,7 @@ func trainMain() {
 
 	gao := ga.NewGA(gaparam)
 	genome := ga.NewFloatGenome(make([]float64, 22), sfcost, 6, 0)
-	gao.Init(1000, genome)
+	gao.Init(250, genome)
 	gao.OptimizeUntil(func(best ga.GAGenome) bool {
 		return best.Score() < 1e-3
 	})
