@@ -167,11 +167,11 @@ func genNewMainParams(params score.Parameters) score.Parameters {
 
 func trainMain2() {
 	method := &optimize.NelderMead{}
-	method.Shrink = 0.95
-	method.Contraction = 0.95
-	method.Reflection = 2.0
-	method.Expansion = 2.0
-	method.SimplexSize = 0.05
+	// method.Shrink = 0.95
+	// method.Contraction = 0.95
+	// method.Reflection = 2.0
+	// method.Expansion = 2.0
+	method.SimplexSize = 0.5
 	initX := []float64{1.5, 2.5, 3.6, 2.0, 3.0, 3.0, 4.0, 3.6, 2.0, 3.5, 3.3, 4.0, 3.5, 2.5, 3.0, 3.5, 3.4, 3.0, 3.0, 3.6, 3.0, 3.0}
 	problem := &optimize.Problem{}
 	problem.Func = func(x []float64) float64 {
@@ -337,6 +337,6 @@ func Train(params score.Parameters) {
 	// traindata := loadData(fn)
 	// fmt.Println(traindata)
 	// trainMain(params, traindata)
-	trainMain()
+	trainMain2()
 
 }
