@@ -7,6 +7,7 @@ import (
 	"bitbucket.org/jgcarvalho/zdd/ligand"
 	"bitbucket.org/jgcarvalho/zdd/protein"
 	"bitbucket.org/jgcarvalho/zdd/score"
+	"bitbucket.org/jgcarvalho/zdd/search"
 	"bitbucket.org/jgcarvalho/zdd/train"
 )
 
@@ -14,6 +15,7 @@ func main() {
 	doTrain := flag.Bool("train", false, "train using genetic algorithm")
 	doTrain2 := flag.Bool("train2", false, "train using nelder mead")
 	doScore := flag.Bool("score", false, "score conformation")
+	doDockGlobal := flag.Bool("dockG", false, "global docking")
 	fprot := flag.String("p", "", "protein mol2")
 	flig := flag.String("l", "", "ligand mol2")
 	flag.Parse()
@@ -21,19 +23,28 @@ func main() {
 	if *doTrain {
 		train.Train(1)
 		return
-	}else if *doTrain2{
+	} else if *doTrain2 {
 		train.Train(2)
 		return
-	}else if *doScore{
-			if *fprot == "" || *flig == ""{
-				fmt.Println("Protein or ligand not set")
-				return
-			}
-			params := score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-			prot := protein.LoadMol2(*fprot)
-			lig := ligand.LoadMol2(*flig)
-			total := params.Score(&prot, &lig)
-			fmt.Println(total)
+	} else if *doScore {
+		if *fprot == "" || *flig == "" {
+			fmt.Println("Protein or ligand not set")
+			return
+		}
+		params := score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
+		prot := protein.LoadMol2(*fprot)
+		lig := ligand.LoadMol2(*flig)
+		total := params.Score(&prot, &lig)
+		fmt.Println(total)
+	} else if *doDockGlobal {
+		if *fprot == "" || *flig == "" {
+			fmt.Println("Protein or ligand not set")
+			return
+		}
+		prot := protein.LoadMol2(*fprot)
+		lig := ligand.LoadMol2(*flig)
+		search.Global(&prot, &lig)
+
 	}
 	// params := score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
 	// // fmt.Println(params)

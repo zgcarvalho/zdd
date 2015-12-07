@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	// "math/rand"
+	"math"
 	"path/filepath"
 
 	"github.com/thoj/go-galib"
@@ -90,7 +90,7 @@ func cost(params score.Parameters, traindata []TrainData) float64 {
 	corr := stat.Correlation(exp,obs,nil)
 	// pkdScore = pkdScore
 	// totalScore = pkdScore * rankScore
-	totalScore = pkdScore/corr + (pkdScore/corr * rankScore)
+	totalScore = pkdScore/math.Abs(corr) + (pkdScore/math.Abs(corr) * rankScore)
 	fmt.Printf("PKD %f - Rank %f - Corr %f- TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
 	return totalScore
 
