@@ -5,15 +5,15 @@ import (
 	"math/rand"
 
 	"bitbucket.org/jgcarvalho/zdd/ligand"
+	"bitbucket.org/jgcarvalho/zdd/optimize"
 	"bitbucket.org/jgcarvalho/zdd/protein"
 	"bitbucket.org/jgcarvalho/zdd/score"
-	"github.com/gonum/optimize"
 )
 
 func nm(params *score.Parameters, l *ligand.Ligand, p *protein.Protein) {
 	orig := l.Center()
-	method := &optimize.NelderMead{}
-	method.SimplexSize = 0.001
+	method := &optimize.CMAES{}
+	// method.SimplexSize = 0.001
 	initX := []float64{orig[0] + rand.Float64(), orig[1] + rand.Float64(), orig[2] + rand.Float64(), 0.0, 0.0, 0.0}
 	problem := &optimize.Problem{}
 	fmt.Println("INICIO", params.Score(p, l))
