@@ -17,7 +17,7 @@ import (
 )
 
 var params score.Parameters
-var traindata []TrainData
+var trainset []TrainItem
 var scores int
 
 // func init() {
@@ -38,7 +38,15 @@ type TrainData struct {
 	Negatives []string
 }
 
-func loadData(fn string) []TrainData {
+type TrainItem struct {
+	Name      string
+	Pkd       float64
+	Receptor  protein.Protein
+	Positive  ligand.Ligand
+	Negatives []ligand.Ligand
+}
+
+func loadData(fn string) []TrainItem {
 	data, err := ioutil.ReadFile(fn)
 	if err != nil {
 		panic(err)
@@ -48,41 +56,55 @@ func loadData(fn string) []TrainData {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
+	trainset := make([]TrainItem, len(traindata))
+	for i := 0; i < len(trainset); i++ {
+		trainset[i].Name = traindata[i].Name
+		trainset[i].Pkd = traindata[i].Pkd
+		trainset[i].Receptor = protein.LoadMol2("./traindata/" + traindata[i].Receptor)
+		trainset[i].Positive = ligand.LoadMol2("./traindata/" + traindata[i].Positive)
+		trainset[i].Negatives = make([]ligand.Ligand, len(traindata[i].Negatives))
+		for j := 0; j < len(trainset[i].Negatives); j++ {
+			trainset[i].Negatives[j] = ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
+		}
+	}
 	// cases := strings.Split(string(data), "\n")
 
-	return traindata
+	return trainset
 }
 
-func cost(params score.Parameters, traindata []TrainData) float64 {
+func cost(params score.Parameters, trainset []TrainItem) float64 {
 	var totalScore float64
-	pkdchan := make(chan float64, len(traindata))
-	rankchan := make(chan float64, len(traindata))
-	exp := make([]float64, len(traindata))
-	obs := make([]float64, len(traindata))
+	pkdchan := make(chan float64, len(trainset))
+	rankchan := make(chan float64, len(trainset))
+	exp := make([]float64, len(trainset))
+	obs := make([]float64, len(trainset))
 	pkdScore := 0.0
 	rankScore := 0.0
-	for i := 0; i < len(traindata); i++ {
+	for i := 0; i < len(trainset); i++ {
 		go func(i int) {
-			protein := protein.LoadMol2("./traindata/" + traindata[i].Receptor)
-			pos := ligand.LoadMol2("./traindata/" + traindata[i].Positive)
+			// protein := protein.LoadMol2("./traindata/" + traindata[i].Receptor)
+			protein := trainset[i].Receptor
+			// pos := ligand.LoadMol2("./traindata/" + traindata[i].Positive)
+			pos := trainset[i].Positive
 			total := params.Score(&protein, &pos)
 
 			rk := 0.0
-			for j := 0; j < len(traindata[i].Negatives); j++ {
-				neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
+			for j := 0; j < len(trainset[i].Negatives); j++ {
+				// neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
+				neg := trainset[i].Negatives[j]
 				negTotal := params.Score(&protein, &neg)
 				if negTotal >= total {
-					rk += 0.1
+					rk += 0.05
 				}
 			}
-			exp[i] = traindata[i].Pkd
+			exp[i] = trainset[i].Pkd
 			obs[i] = total
-			pkdchan <- (traindata[i].Pkd - total) * (traindata[i].Pkd - total)
+			pkdchan <- 2 * ((trainset[i].Pkd - total) * (trainset[i].Pkd - total))
 			rankchan <- rk
 		}(i)
 	}
 
-	for i := 0; i < len(traindata); i++ {
+	for i := 0; i < len(trainset); i++ {
 		pkdScore += <-pkdchan
 		rankScore += <-rankchan
 	}
@@ -90,7 +112,7 @@ func cost(params score.Parameters, traindata []TrainData) float64 {
 	// pkdScore = pkdScore
 	// totalScore = pkdScore * rankScore
 	totalScore = pkdScore/math.Abs(corr) + (pkdScore / math.Abs(corr) * rankScore)
-	fmt.Printf("PKD %f - Rank %f - Corr %f- TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
+	fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
 	return totalScore
 
 }
@@ -164,7 +186,7 @@ func trainMain2() {
 			params[k] = tmp
 		}
 		fmt.Println(x)
-		return cost(params, traindata)
+		return cost(params, trainset)
 	}
 
 	result, err := optimize.Local(*problem, initX, nil, method)
@@ -243,7 +265,7 @@ func trainMain3() {
 			params[k] = tmp
 		}
 		fmt.Println(x)
-		return cost(params, traindata)
+		return cost(params, trainset)
 	}
 
 	result, err := optimize.Local(*problem, initX, nil, method)
@@ -334,7 +356,7 @@ func sfcost(g *ga.GAFloatGenome) float64 {
 		params[k] = tmp
 	}
 	fmt.Println(g.Gene)
-	return cost(params, traindata)
+	return cost(params, trainset)
 }
 
 func Train(method int) {
@@ -344,7 +366,7 @@ func Train(method int) {
 		fmt.Println("Arquivo com dados de treinamento", err)
 		panic(err)
 	}
-	traindata = loadData(fn)
+	trainset = loadData(fn)
 	switch method {
 	case 1:
 		trainMain()
