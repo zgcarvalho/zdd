@@ -94,12 +94,12 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 				neg := trainset[i].Negatives[j]
 				negTotal := params.Score(&protein, &neg)
 				if negTotal >= total {
-					rk += 0.05
+					rk += 1.0
 				}
 			}
 			exp[i] = trainset[i].Pkd
 			obs[i] = total
-			pkdchan <- 2 * ((trainset[i].Pkd - total) * (trainset[i].Pkd - total))
+			pkdchan <- ((trainset[i].Pkd - total) * (trainset[i].Pkd - total))
 			rankchan <- rk
 		}(i)
 	}
@@ -109,10 +109,11 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 		rankScore += <-rankchan
 	}
 	corr := stat.Correlation(exp, obs, nil)
-	// pkdScore = pkdScore
-	// totalScore = pkdScore * rankScore
-	totalScore = pkdScore/math.Abs(corr) + (pkdScore / math.Abs(corr) * rankScore)
-	fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
+
+	// totalScore = pkdScore/(corr*corr) + (pkdScore / (corr * corr) * rankScore)
+	totalScore = pkdScore*(30.0-29.0*corr) + (math.Sqrt(pkdScore) * (30.0 - 29.0*corr) * rankScore)
+	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
+	fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(pkdScore/192.0), rankScore, corr, totalScore)
 	return totalScore
 
 }
