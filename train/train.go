@@ -32,7 +32,7 @@ var scores int
 
 type TrainData struct {
 	Name      string
-	Pkd       float64
+	Energy    float64
 	Receptor  string
 	Positive  string
 	Negatives []string
@@ -40,7 +40,7 @@ type TrainData struct {
 
 type TrainItem struct {
 	Name      string
-	Pkd       float64
+	Energy    float64
 	Receptor  protein.Protein
 	Positive  ligand.Ligand
 	Negatives []ligand.Ligand
@@ -59,7 +59,7 @@ func loadData(fn string) []TrainItem {
 	trainset := make([]TrainItem, len(traindata))
 	for i := 0; i < len(trainset); i++ {
 		trainset[i].Name = traindata[i].Name
-		trainset[i].Pkd = traindata[i].Pkd
+		trainset[i].Energy = traindata[i].Energy
 		trainset[i].Receptor = protein.LoadMol2("./traindata/" + traindata[i].Receptor)
 		trainset[i].Positive = ligand.LoadMol2("./traindata/" + traindata[i].Positive)
 		trainset[i].Negatives = make([]ligand.Ligand, len(traindata[i].Negatives))
@@ -74,11 +74,11 @@ func loadData(fn string) []TrainItem {
 
 func cost(params score.Parameters, trainset []TrainItem) float64 {
 	var totalScore float64
-	pkdchan := make(chan float64, len(trainset))
+	enerchan := make(chan float64, len(trainset))
 	rankchan := make(chan float64, len(trainset))
 	exp := make([]float64, len(trainset))
 	obs := make([]float64, len(trainset))
-	pkdScore := 0.0
+	enerScore := 0.0
 	rankScore := 0.0
 	for i := 0; i < len(trainset); i++ {
 		go func(i int) {
@@ -93,27 +93,27 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 				// neg := ligand.LoadMol2("./traindata/" + traindata[i].Negatives[j])
 				neg := trainset[i].Negatives[j]
 				negTotal := params.Score(&protein, &neg)
-				if negTotal >= total {
+				if negTotal <= total {
 					rk += 1.0
 				}
 			}
-			exp[i] = trainset[i].Pkd
+			exp[i] = trainset[i].Energy
 			obs[i] = total
-			pkdchan <- ((trainset[i].Pkd - total) * (trainset[i].Pkd - total))
+			enerchan <- ((trainset[i].Energy - total) * (trainset[i].Energy - total))
 			rankchan <- rk
 		}(i)
 	}
 
 	for i := 0; i < len(trainset); i++ {
-		pkdScore += <-pkdchan
+		enerScore += <-enerchan
 		rankScore += <-rankchan
 	}
 	corr := stat.Correlation(exp, obs, nil)
 
-	// totalScore = pkdScore/(corr*corr) + (pkdScore / (corr * corr) * rankScore)
-	totalScore = pkdScore*(30.0-29.0*corr) + (math.Sqrt(pkdScore) * (30.0 - 29.0*corr) * rankScore)
-	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", pkdScore, rankScore, corr, totalScore)
-	fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(pkdScore/192.0), rankScore, corr, totalScore)
+	// totalScore = enerScore/(corr*corr) + (enerScore / (corr * corr) * rankScore)
+	totalScore = enerScore*(30.0-29.0*corr) + (math.Sqrt(enerScore) * (30.0 - 29.0*corr) * rankScore)
+	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", enerScore, rankScore, corr, totalScore)
+	fmt.Printf("Energy %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(enerScore/192.0), rankScore, corr, totalScore)
 	return totalScore
 
 }
@@ -128,27 +128,27 @@ func trainMain2() {
 	initX := []float64{1.5, 2.5, 3.6, 2.0, 3.0, 3.0, 4.0, 3.6, 2.0, 3.5, 3.3, 4.0, 3.5, 2.5, 3.0, 3.5, 3.4, 3.0, 3.0, 3.6, 3.0, 3.0}
 	problem := &optimize.Problem{}
 	problem.Func = func(x []float64) float64 {
-		penal := (x[0] * 3.0) + 5.0
+		penal := (x[0] * 15000.0) + 30000.0
 		metalDbest := x[1] * 1.0
-		metalAlpha := x[2] * 0.2
+		metalAlpha := x[2] * -4500.0
 		metalBeta := x[3] * 0.3
 		repulsiveDbest := x[4] * 1.0
-		repulsiveAlpha := x[5] * -0.01
+		repulsiveAlpha := x[5] * 50.0
 		repulsiveBeta := x[6] * 0.3
 		buriedDbest := x[7] * 1.0
-		buriedAlpha := x[8] * 0.001
+		buriedAlpha := x[8] * -5.0
 		buriedBeta := x[9] * 0.3
 		hbondDbest := x[10] * 1.0
 		hbondAlpha := x[11] * 0.1
-		hbondBeta := x[12] * 0.3
+		hbondBeta := x[12] * -1500.0
 		haDbest := x[13] * 1.0
-		haAlpha := x[14] * 0.1
+		haAlpha := x[14] * -1000.0
 		haBeta := x[15] * 0.3
 		harepDbest := x[16] * 1.0
-		harepAlpha := x[17] * -0.002
+		harepAlpha := x[17] * 100.0
 		harepBeta := x[18] * 0.3
 		npolarDbest := x[19] * 1.0
-		npolarAlpha := x[20] * 0.01
+		npolarAlpha := x[20] * -50.0
 		npolarBeta := x[21] * 0.3
 		for k := range params {
 			tmp := params[k]
@@ -207,27 +207,27 @@ func trainMain3() {
 	initX := []float64{1.5, 2.5, 3.6, 2.0, 3.0, 3.0, 4.0, 3.6, 2.0, 3.5, 3.3, 4.0, 3.5, 2.5, 3.0, 3.5, 3.4, 3.0, 3.0, 3.6, 3.0, 3.0}
 	problem := &optimize.Problem{}
 	problem.Func = func(x []float64) float64 {
-		penal := (x[0] * 3.0) + 5.0
+		penal := (x[0] * 15000.0) + 30000.0
 		metalDbest := x[1] * 1.0
-		metalAlpha := x[2] * 0.2
+		metalAlpha := x[2] * -4500.0
 		metalBeta := x[3] * 0.3
 		repulsiveDbest := x[4] * 1.0
-		repulsiveAlpha := x[5] * -0.01
+		repulsiveAlpha := x[5] * 50.0
 		repulsiveBeta := x[6] * 0.3
 		buriedDbest := x[7] * 1.0
-		buriedAlpha := x[8] * 0.001
+		buriedAlpha := x[8] * -5.0
 		buriedBeta := x[9] * 0.3
 		hbondDbest := x[10] * 1.0
 		hbondAlpha := x[11] * 0.1
-		hbondBeta := x[12] * 0.3
+		hbondBeta := x[12] * -1500.0
 		haDbest := x[13] * 1.0
-		haAlpha := x[14] * 0.1
+		haAlpha := x[14] * -1000.0
 		haBeta := x[15] * 0.3
 		harepDbest := x[16] * 1.0
-		harepAlpha := x[17] * -0.002
+		harepAlpha := x[17] * 100.0
 		harepBeta := x[18] * 0.3
 		npolarDbest := x[19] * 1.0
-		npolarAlpha := x[20] * 0.01
+		npolarAlpha := x[20] * -50.0
 		npolarBeta := x[21] * 0.3
 		for k := range params {
 			tmp := params[k]
@@ -298,27 +298,27 @@ func trainMain() {
 }
 
 func sfcost(g *ga.GAFloatGenome) float64 {
-	penal := (g.Gene[0] * 3.0) + 5.0
+	penal := (g.Gene[0] * 15000.0) + 30000.0
 	metalDbest := g.Gene[1] * 1.0
-	metalAlpha := g.Gene[2] * 0.2
+	metalAlpha := g.Gene[2] * -4500.0
 	metalBeta := g.Gene[3] * 0.3
 	repulsiveDbest := g.Gene[4] * 1.0
-	repulsiveAlpha := g.Gene[5] * -0.01
+	repulsiveAlpha := g.Gene[5] * 50.0
 	repulsiveBeta := g.Gene[6] * 0.3
 	buriedDbest := g.Gene[7] * 1.0
-	buriedAlpha := g.Gene[8] * 0.001
+	buriedAlpha := g.Gene[8] * -5.0
 	buriedBeta := g.Gene[9] * 0.3
 	hbondDbest := g.Gene[10] * 1.0
 	hbondAlpha := g.Gene[11] * 0.1
-	hbondBeta := g.Gene[12] * 0.3
+	hbondBeta := g.Gene[12] * -1500.0
 	haDbest := g.Gene[13] * 1.0
-	haAlpha := g.Gene[14] * 0.1
+	haAlpha := g.Gene[14] * -1000.0
 	haBeta := g.Gene[15] * 0.3
 	harepDbest := g.Gene[16] * 1.0
-	harepAlpha := g.Gene[17] * -0.002
+	harepAlpha := g.Gene[17] * 100.0
 	harepBeta := g.Gene[18] * 0.3
 	npolarDbest := g.Gene[19] * 1.0
-	npolarAlpha := g.Gene[20] * 0.01
+	npolarAlpha := g.Gene[20] * -50.0
 	npolarBeta := g.Gene[21] * 0.3
 	for k := range params {
 		tmp := params[k]
@@ -362,7 +362,7 @@ func sfcost(g *ga.GAFloatGenome) float64 {
 
 func Train(method int) {
 	params = score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-	fn, err := filepath.Abs("./traindata/data.json")
+	fn, err := filepath.Abs("./traindata/data_teste.json")
 	if err != nil {
 		fmt.Println("Arquivo com dados de treinamento", err)
 		panic(err)

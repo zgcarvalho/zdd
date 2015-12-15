@@ -43,7 +43,7 @@ func score(d, dbest, alpha, beta, penal, wa, wb, wpenal float64) float64 {
 	alpha = alpha / 2.0
 	value := 0.0
 	if d < dbest {
-		value = (wpenal*penal+wa*alpha)*(-math.Cos(math.Pi*d/dbest)) - (wpenal*penal - wa*alpha)
+		value = (wpenal*penal+(wa*alpha*-1.0))*(math.Cos(math.Pi*d/dbest)) + (wpenal*penal + wa*alpha)
 	} else {
 		value = (2 * (wa * alpha)) * math.Exp((-1*math.Pow((d-dbest), 2))/(2*wb*beta))
 	}
