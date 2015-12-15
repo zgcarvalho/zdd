@@ -20,16 +20,6 @@ var params score.Parameters
 var trainset []TrainItem
 var scores int
 
-// func init() {
-// 	params = score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-// 	fn, err := filepath.Abs("./traindata/data.json")
-// 	if err != nil {
-// 		fmt.Println("Arquivo com dados de treinamento", err)
-// 		panic(err)
-// 	}
-// 	traindata = loadData(fn)
-// }
-
 type TrainData struct {
 	Name      string
 	Energy    float64
@@ -72,6 +62,90 @@ func loadData(fn string) []TrainItem {
 	return trainset
 }
 
+func trainMain() {
+
+	gaparam := ga.GAParameter{
+		Initializer: new(ga.GARandomInitializer),
+		Selector:    ga.NewGATournamentSelector(0.2, 5),
+		Breeder:     new(ga.GA2PointBreeder),
+		Mutator:     ga.NewGAGaussianMutator(0.4, 0),
+		PMutate:     0.5,
+		PBreed:      0.2}
+
+	gao := ga.NewGA(gaparam)
+	genome := ga.NewFloatGenome(make([]float64, 22), sfcost, 6, 0)
+	gao.Init(250, genome)
+	gao.OptimizeUntil(func(best ga.GAGenome) bool {
+		return best.Score() < 1e-3
+	})
+	best := gao.Best().(*ga.GAFloatGenome)
+	fmt.Printf("%s = %f\n", best, best.Score())
+	fmt.Printf("Calls to score = %d\n", scores)
+}
+
+func sfcost(g *ga.GAFloatGenome) float64 {
+	penal := (g.Gene[0] * 15000.0) + 30000.0
+	metalDbest := g.Gene[1] * 1.0
+	metalAlpha := g.Gene[2] * -4500.0
+	metalBeta := g.Gene[3] * 0.3
+	repulsiveDbest := g.Gene[4] * 1.0
+	repulsiveAlpha := g.Gene[5] * 50.0
+	repulsiveBeta := g.Gene[6] * 0.3
+	buriedDbest := g.Gene[7] * 1.0
+	buriedAlpha := g.Gene[8] * -5.0
+	buriedBeta := g.Gene[9] * 0.3
+	hbondDbest := g.Gene[10] * 1.0
+	hbondAlpha := g.Gene[11] * 0.1
+	hbondBeta := g.Gene[12] * -1500.0
+	haDbest := g.Gene[13] * 1.0
+	haAlpha := g.Gene[14] * -1000.0
+	haBeta := g.Gene[15] * 0.3
+	harepDbest := g.Gene[16] * 1.0
+	harepAlpha := g.Gene[17] * 100.0
+	harepBeta := g.Gene[18] * 0.3
+	npolarDbest := g.Gene[19] * 1.0
+	npolarAlpha := g.Gene[20] * -50.0
+	npolarBeta := g.Gene[21] * 0.3
+	for k := range params {
+		tmp := params[k]
+		tmp.Penal = penal
+		if tmp.Type == "metal" {
+			tmp.Dbest = metalDbest
+			tmp.Alpha = metalAlpha
+			tmp.Beta = metalBeta
+		} else if tmp.Type == "repulsive" {
+			tmp.Dbest = repulsiveDbest
+			tmp.Alpha = repulsiveAlpha
+			tmp.Beta = repulsiveBeta
+		} else if tmp.Type == "buried" {
+			tmp.Dbest = buriedDbest
+			tmp.Alpha = buriedAlpha
+			tmp.Beta = buriedBeta
+		} else if tmp.Type == "hbond" {
+			tmp.Dbest = hbondDbest
+			tmp.Alpha = hbondAlpha
+			tmp.Beta = hbondBeta
+		} else if tmp.Type == "ha" {
+			tmp.Dbest = haDbest
+			tmp.Alpha = haAlpha
+			tmp.Beta = haBeta
+		} else if tmp.Type == "ha-repulsive" {
+			tmp.Dbest = harepDbest
+			tmp.Alpha = harepAlpha
+			tmp.Beta = harepBeta
+		} else if tmp.Type == "npolar" {
+			tmp.Dbest = npolarDbest
+			tmp.Alpha = npolarAlpha
+			tmp.Beta = npolarBeta
+		} else {
+			fmt.Println("Que tipo é esse?", tmp.Type)
+		}
+		params[k] = tmp
+	}
+	fmt.Println(g.Gene)
+	return cost(params, trainset)
+}
+
 func cost(params score.Parameters, trainset []TrainItem) float64 {
 	var totalScore float64
 	enerchan := make(chan float64, len(trainset))
@@ -111,7 +185,7 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 	corr := stat.Correlation(exp, obs, nil)
 
 	// totalScore = enerScore/(corr*corr) + (enerScore / (corr * corr) * rankScore)
-	totalScore = enerScore*(30.0-29.0*corr) + (math.Sqrt(enerScore) * (30.0 - 29.0*corr) * rankScore)
+	totalScore = enerScore*(1000.0-999.0*corr) + (math.Sqrt(enerScore) * (1000.0 - 999.0*corr) * rankScore * 1000000.0)
 	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", enerScore, rankScore, corr, totalScore)
 	fmt.Printf("Energy %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(enerScore/float64(len(trainset))), rankScore, corr, totalScore)
 	return totalScore
@@ -120,12 +194,12 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 
 func trainMain2() {
 	method := &optimize.NelderMead{}
-	// method.Shrink = 0.95
-	// method.Contraction = 0.95
-	// method.Reflection = 2.0
-	// method.Expansion = 2.0
-	method.SimplexSize = 0.5
-	initX := []float64{1.5, 2.5, 3.6, 2.0, 3.0, 3.0, 4.0, 3.6, 2.0, 3.5, 3.3, 4.0, 3.5, 2.5, 3.0, 3.5, 3.4, 3.0, 3.0, 3.6, 3.0, 3.0}
+	method.Shrink = 0.95
+	method.Contraction = 0.95
+	method.Reflection = 2.0
+	method.Expansion = 2.0
+	method.SimplexSize = 1.0
+	initX := []float64{0.5, 1.5, 3.0, 2.0, 2.0, 3.0, 4.0, 3.5, 2.0, 3.0, 2.0, 4.5, 3.5, 2.5, 3.0, 3.5, 3.5, 3.0, 3.0, 3.5, 4.0, 4.0}
 	problem := &optimize.Problem{}
 	problem.Func = func(x []float64) float64 {
 		penal := (x[0] * 15000.0) + 30000.0
@@ -276,93 +350,9 @@ func trainMain3() {
 	fmt.Println("###RESULT:", result)
 }
 
-func trainMain() {
-
-	gaparam := ga.GAParameter{
-		Initializer: new(ga.GARandomInitializer),
-		Selector:    ga.NewGATournamentSelector(0.2, 5),
-		Breeder:     new(ga.GA2PointBreeder),
-		Mutator:     ga.NewGAGaussianMutator(0.4, 0),
-		PMutate:     0.5,
-		PBreed:      0.2}
-
-	gao := ga.NewGA(gaparam)
-	genome := ga.NewFloatGenome(make([]float64, 22), sfcost, 6, 0)
-	gao.Init(250, genome)
-	gao.OptimizeUntil(func(best ga.GAGenome) bool {
-		return best.Score() < 1e-3
-	})
-	best := gao.Best().(*ga.GAFloatGenome)
-	fmt.Printf("%s = %f\n", best, best.Score())
-	fmt.Printf("Calls to score = %d\n", scores)
-}
-
-func sfcost(g *ga.GAFloatGenome) float64 {
-	penal := (g.Gene[0] * 15000.0) + 30000.0
-	metalDbest := g.Gene[1] * 1.0
-	metalAlpha := g.Gene[2] * -4500.0
-	metalBeta := g.Gene[3] * 0.3
-	repulsiveDbest := g.Gene[4] * 1.0
-	repulsiveAlpha := g.Gene[5] * 50.0
-	repulsiveBeta := g.Gene[6] * 0.3
-	buriedDbest := g.Gene[7] * 1.0
-	buriedAlpha := g.Gene[8] * -5.0
-	buriedBeta := g.Gene[9] * 0.3
-	hbondDbest := g.Gene[10] * 1.0
-	hbondAlpha := g.Gene[11] * 0.1
-	hbondBeta := g.Gene[12] * -1500.0
-	haDbest := g.Gene[13] * 1.0
-	haAlpha := g.Gene[14] * -1000.0
-	haBeta := g.Gene[15] * 0.3
-	harepDbest := g.Gene[16] * 1.0
-	harepAlpha := g.Gene[17] * 100.0
-	harepBeta := g.Gene[18] * 0.3
-	npolarDbest := g.Gene[19] * 1.0
-	npolarAlpha := g.Gene[20] * -50.0
-	npolarBeta := g.Gene[21] * 0.3
-	for k := range params {
-		tmp := params[k]
-		tmp.Penal = penal
-		if tmp.Type == "metal" {
-			tmp.Dbest = metalDbest
-			tmp.Alpha = metalAlpha
-			tmp.Beta = metalBeta
-		} else if tmp.Type == "repulsive" {
-			tmp.Dbest = repulsiveDbest
-			tmp.Alpha = repulsiveAlpha
-			tmp.Beta = repulsiveBeta
-		} else if tmp.Type == "buried" {
-			tmp.Dbest = buriedDbest
-			tmp.Alpha = buriedAlpha
-			tmp.Beta = buriedBeta
-		} else if tmp.Type == "hbond" {
-			tmp.Dbest = hbondDbest
-			tmp.Alpha = hbondAlpha
-			tmp.Beta = hbondBeta
-		} else if tmp.Type == "ha" {
-			tmp.Dbest = haDbest
-			tmp.Alpha = haAlpha
-			tmp.Beta = haBeta
-		} else if tmp.Type == "ha-repulsive" {
-			tmp.Dbest = harepDbest
-			tmp.Alpha = harepAlpha
-			tmp.Beta = harepBeta
-		} else if tmp.Type == "npolar" {
-			tmp.Dbest = npolarDbest
-			tmp.Alpha = npolarAlpha
-			tmp.Beta = npolarBeta
-		} else {
-			fmt.Println("Que tipo é esse?", tmp.Type)
-		}
-		params[k] = tmp
-	}
-	fmt.Println(g.Gene)
-	return cost(params, trainset)
-}
-
 func Train(method int) {
 	params = score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-	fn, err := filepath.Abs("./traindata/data_teste.json")
+	fn, err := filepath.Abs("./traindata/data.json")
 	if err != nil {
 		fmt.Println("Arquivo com dados de treinamento", err)
 		panic(err)
