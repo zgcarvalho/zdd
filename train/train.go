@@ -113,7 +113,7 @@ func cost(params score.Parameters, trainset []TrainItem) float64 {
 	// totalScore = enerScore/(corr*corr) + (enerScore / (corr * corr) * rankScore)
 	totalScore = enerScore*(30.0-29.0*corr) + (math.Sqrt(enerScore) * (30.0 - 29.0*corr) * rankScore)
 	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", enerScore, rankScore, corr, totalScore)
-	fmt.Printf("Energy %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(enerScore/192.0), rankScore, corr, totalScore)
+	fmt.Printf("Energy %f - Rank %f - Corr %f - TOTAL %f\n", math.Sqrt(enerScore/float64(len(trainset))), rankScore, corr, totalScore)
 	return totalScore
 
 }
