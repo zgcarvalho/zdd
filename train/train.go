@@ -278,7 +278,7 @@ func trainMain3() {
 	// method.Reflection = 2.0
 	// method.Expansion = 2.0
 	// method.SimplexSize = 0.5
-	initX := []float64{1.5, 2.5, 3.6, 2.0, 3.0, 3.0, 4.0, 3.6, 2.0, 3.5, 3.3, 4.0, 3.5, 2.5, 3.0, 3.5, 3.4, 3.0, 3.0, 3.6, 3.0, 3.0}
+	initX := []float64{0.5, 1.5, 3.0, 2.0, 2.0, 3.0, 4.0, 3.5, 2.0, 3.0, 2.0, 4.5, 3.5, 2.5, 3.0, 3.5, 3.5, 3.0, 3.0, 3.5, 4.0, 4.0}
 	problem := &optimize.Problem{}
 	problem.Func = func(x []float64) float64 {
 		penal := (x[0] * 15000.0) + 30000.0
