@@ -3,10 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math"
 
 	"bitbucket.org/jgcarvalho/zdd/ligand"
-	"bitbucket.org/jgcarvalho/zdd/optimize"
 	"bitbucket.org/jgcarvalho/zdd/protein"
 	"bitbucket.org/jgcarvalho/zdd/score"
 	"bitbucket.org/jgcarvalho/zdd/search"
@@ -17,6 +15,7 @@ func main() {
 	doTrain := flag.Bool("train", false, "train using genetic algorithm")
 	doTrain2 := flag.Bool("train2", false, "train using nelder mead")
 	doTrain3 := flag.Bool("train3", false, "CMA-ES")
+	doTrain4 := flag.Bool("train4", false, "CMA-ES without ranking")
 	doScore := flag.Bool("score", false, "score conformation")
 	doDockGlobal := flag.Bool("dockG", false, "global docking")
 	fprot := flag.String("p", "", "protein mol2")
@@ -31,6 +30,9 @@ func main() {
 		return
 	} else if *doTrain3 {
 		train.Train(3)
+		return
+	} else if *doTrain4 {
+		train.Train(4)
 		return
 	} else if *doScore {
 		if *fprot == "" || *flig == "" {
@@ -54,27 +56,27 @@ func main() {
 	}
 
 	// teste de otimizacao
-	method := &optimize.CMAES{}
-	initX := []float64{1, 2, 1, 1, 1, 1}
-	problem := &optimize.Problem{}
-	problem.Func = func(x []float64) (sum float64) {
-		if len(x) != 6 {
-			panic("dimension of the problem must be 6")
-		}
-
-		for i := 1; i <= 13; i++ {
-			z := float64(i) / 10
-			y := math.Exp(-z) - 5*math.Exp(-10*z) + 3*math.Exp(-4*z)
-			f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) + x[5]*math.Exp(-x[4]*z) - y
-			sum += f * f
-		}
-		return sum
-	}
-	result, err := optimize.Local(*problem, initX, nil, method)
-	if err != nil {
-		fmt.Println("Erro minimização:", err)
-	}
-	fmt.Println("###RESULT:", result)
+	// method := &optimize.CMAES{}
+	// initX := []float64{1, 2, 1, 1, 1, 1}
+	// problem := &optimize.Problem{}
+	// problem.Func = func(x []float64) (sum float64) {
+	// 	if len(x) != 6 {
+	// 		panic("dimension of the problem must be 6")
+	// 	}
+	//
+	// 	for i := 1; i <= 13; i++ {
+	// 		z := float64(i) / 10
+	// 		y := math.Exp(-z) - 5*math.Exp(-10*z) + 3*math.Exp(-4*z)
+	// 		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) + x[5]*math.Exp(-x[4]*z) - y
+	// 		sum += f * f
+	// 	}
+	// 	return sum
+	// }
+	// result, err := optimize.Local(*problem, initX, nil, method)
+	// if err != nil {
+	// 	fmt.Println("Erro minimização:", err)
+	// }
+	// fmt.Println("###RESULT:", result)
 
 	// params := score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
 	// // fmt.Println(params)

@@ -13,9 +13,12 @@ import (
 )
 
 type Ligand struct {
-	Name   string
-	Atoms  []atom.Atom
-	Angles [3]float64
+	Name     string
+	Atoms    []atom.Atom
+	Angles   [3]float64
+	NPatoms  int
+	Patoms   int
+	RotBonds int
 }
 
 func (l Ligand) Center() [3]float64 {
@@ -115,6 +118,8 @@ func LoadMol2(fn string) Ligand {
 		log.Fatal(err)
 	}
 	atoms := make([]atom.Atom, 0)
+	npAtoms := 0
+	pAtoms := 0
 	bf := bufio.NewReader(f)
 	isAtom := false
 	for {
@@ -141,6 +146,12 @@ func LoadMol2(fn string) Ligand {
 				if strings.Contains(string(line)[46:56], v) {
 					name = v
 					atoms = append(atoms, atom.Atom{name, [3]float64{x, y, z}})
+					_, isNp := atom.NonPolar[name]
+					if isNp {
+						npAtoms += 1
+					} else {
+						pAtoms += 1
+					}
 					break
 				}
 			}
@@ -150,6 +161,6 @@ func LoadMol2(fn string) Ligand {
 		}
 	}
 
-	return Ligand{fn, atoms, [3]float64{0.0, 0.0, 0.0}}
+	return Ligand{fn, atoms, [3]float64{0.0, 0.0, 0.0}, npAtoms, pAtoms, 0}
 	// fmt.Println(atoms)
 }

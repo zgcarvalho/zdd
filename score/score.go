@@ -28,7 +28,16 @@ type Interaction struct {
 	Wpenal float64
 }
 
-type Parameters map[string]Interaction
+type Parameters struct {
+	Inter map[string]Interaction
+	Wnp   float64
+	Enp   float64
+	Wp    float64
+	Ep    float64
+	Wrb   float64
+	Erb   float64
+	C     float64
+}
 
 func dist(coord1 [3]float64, coord2 [3]float64) float64 {
 	u := coord1[0] - coord2[0]
@@ -51,12 +60,14 @@ func score(d, dbest, alpha, beta, penal, wa, wb, wpenal float64) float64 {
 }
 
 func LoadParams(fn string) Parameters {
+	var params Parameters
 	f, err := os.Open(fn)
 	defer f.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	params := make(map[string]Interaction)
+	//Parameters
+	params.Inter = make(map[string]Interaction)
 	// count := 0
 	bf := bufio.NewReader(f)
 	bf.ReadLine() //skip header
@@ -79,8 +90,8 @@ func LoadParams(fn string) Parameters {
 		wa, _ := strconv.ParseFloat(data[7], 64)
 		wb, _ := strconv.ParseFloat(data[8], 64)
 		wpenal, _ := strconv.ParseFloat(data[9], 64)
-		params[data[0]+"_"+data[1]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
-		params[data[1]+"_"+data[0]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
+		params.Inter[data[0]+"_"+data[1]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
+		params.Inter[data[1]+"_"+data[0]] = Interaction{data[0], data[1], data[2], d, a, b, penal, wa, wb, wpenal}
 		// params[count] = Interaction{data[0], data[1], d, a, b, penal, wa, wb, wpenal}
 		// count++
 	}
@@ -92,8 +103,12 @@ func (prm Parameters) Score(p *protein.Protein, l *ligand.Ligand) float64 {
 	for _, la := range l.Atoms {
 		for _, lp := range p.Atoms {
 			c := lp.Name + "_" + la.Name
-			total += score(dist(lp.Coord, la.Coord), prm[c].Dbest, prm[c].Alpha, prm[c].Beta, prm[c].Penal, prm[c].Wa, prm[c].Wb, prm[c].Wpenal)
+			total += score(dist(lp.Coord, la.Coord), prm.Inter[c].Dbest, prm.Inter[c].Alpha, prm.Inter[c].Beta, prm.Inter[c].Penal, prm.Inter[c].Wa, prm.Inter[c].Wb, prm.Inter[c].Wpenal)
 		}
 	}
+	total += prm.Wnp * math.Pow(float64(l.NPatoms), prm.Enp)
+	total += prm.Wp * math.Pow(float64(l.Patoms), prm.Ep)
+	total += prm.Wrb * math.Pow(float64(l.RotBonds), prm.Erb)
+	total += prm.C
 	return total
 }

@@ -1,5 +1,5 @@
 acceptors = ['N.1',  'N.ar', 'O.2', 'O.co2']
-donors = [ 'N.4', 'N.am', 'N.pl3', 'P.3']
+donors = [ 'N.4', 'N.am', 'N.pl3']
 aAndD = ['N.2', 'N.3','O.3']
 halogens = ['Br','Cl', 'F', 'I']
 metals = ['Al', 'Ca', 'C.cat',  'Co.oh', 'Cr.oh', 'Cr.th', 'Cu', 'Fe', 'K', 'Li', 'Mg', 'Mn', 'Mo', 'Na', 'Sn', 'Zn']
