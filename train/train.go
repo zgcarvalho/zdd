@@ -260,6 +260,9 @@ func cost3(params score.Parameters, trainset []TrainItem) float64 {
 					if rk == 5 {
 						break
 					}
+					if rk > 5 {
+						fmt.Println("FUCK")
+					}
 				}
 
 			}
@@ -286,7 +289,10 @@ func cost3(params score.Parameters, trainset []TrainItem) float64 {
 	rankScore = rankScore / float64(len(trainset))
 
 	corr := stat.Correlation(exp, obs, nil)
-	corrSquared := corr * corr
+	corrSquared := 0.0
+	if corr > 0.0 {
+		corrSquared = corr * corr
+	}
 
 	// totalScore = enerScore/(corr*corr) + (enerScore / (corr * corr) * rankScore)
 	// totalScore = enerScore*(2000.0-1999.0*corr) + (math.Sqrt(enerScore) * (2000.0 - 1999.0*corr) * rankScore * 1000000.0)
@@ -615,7 +621,7 @@ func trainMain5() {
 
 func Train(method int) {
 	params = score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-	fn, err := filepath.Abs("./traindata/data_teste.json")
+	fn, err := filepath.Abs("./traindata/data.json")
 	if err != nil {
 		fmt.Println("Arquivo com dados de treinamento", err)
 		panic(err)
