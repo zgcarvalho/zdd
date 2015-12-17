@@ -16,6 +16,7 @@ func main() {
 	doTrain2 := flag.Bool("train2", false, "train using nelder mead")
 	doTrain3 := flag.Bool("train3", false, "CMA-ES")
 	doTrain4 := flag.Bool("train4", false, "CMA-ES without ranking")
+	doTrain5 := flag.Bool("train5", false, "CMA-ES corr and ranking")
 	doScore := flag.Bool("score", false, "score conformation")
 	doDockGlobal := flag.Bool("dockG", false, "global docking")
 	fprot := flag.String("p", "", "protein mol2")
@@ -33,6 +34,9 @@ func main() {
 		return
 	} else if *doTrain4 {
 		train.Train(4)
+		return
+	} else if *doTrain5 {
+		train.Train(5)
 		return
 	} else if *doScore {
 		if *fprot == "" || *flig == "" {

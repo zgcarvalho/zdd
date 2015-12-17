@@ -237,6 +237,65 @@ func cost2(params score.Parameters, trainset []TrainItem) float64 {
 	return totalScore
 }
 
+func cost3(params score.Parameters, trainset []TrainItem) float64 {
+	var totalScore float64
+	// enerchan := make(chan float64, len(trainset))
+	rankchan := make(chan float64, len(trainset))
+	exp := make([]float64, len(trainset))
+	obs := make([]float64, len(trainset))
+	// nNegatives := 0.0
+	// enerScore := 0.0
+	rankScore := 0.0
+	for i := 0; i < len(trainset); i++ {
+		go func(i int) {
+			protein := trainset[i].Receptor
+			pos := trainset[i].Positive
+			total := params.Score(&protein, &pos)
+			rk := 0
+			for j := 0; j < len(trainset[i].Negatives); j++ {
+				neg := trainset[i].Negatives[j]
+				negTotal := params.Score(&protein, &neg)
+				if negTotal <= total {
+					rk += 1
+					if rk == 5 {
+						break
+					}
+				}
+
+			}
+			exp[i] = trainset[i].Energy
+			obs[i] = total
+			// enerchan <- ((trainset[i].Energy - total) * (trainset[i].Energy - total))
+			rankchan <- float64(rk) / 5.0
+			// nNegatives += float64(len(trainset[i].Negatives))
+		}(i)
+	}
+
+	// var ranktmp float64
+	for i := 0; i < len(trainset); i++ {
+		rankScore += <-rankchan
+	}
+	// 	ranktmp = <-rankchan
+	// 	if ranktmp > rankScore {
+	// 		rankScore = ranktmp
+	// 	}
+	// 	// enerScore += <-enerchan
+	// 	//
+	// }
+
+	rankScore = rankScore / float64(len(trainset))
+
+	corr := stat.Correlation(exp, obs, nil)
+	corrSquared := corr * corr
+
+	// totalScore = enerScore/(corr*corr) + (enerScore / (corr * corr) * rankScore)
+	// totalScore = enerScore*(2000.0-1999.0*corr) + (math.Sqrt(enerScore) * (2000.0 - 1999.0*corr) * rankScore * 1000000.0)
+	totalScore = (math.Pow(1-corrSquared, 2) + math.Pow(rankScore, 2)) * 1000
+	// fmt.Printf("PKD %f - Rank %f - Corr %f - TOTAL %f\n", enerScore, rankScore, corr, totalScore)
+	fmt.Printf("Corr %f - Corr^2 %f - Rank %f - TOTAL %f\n", corr, corrSquared, rankScore, totalScore)
+	return totalScore
+}
+
 func trainMain2() {
 	method := &optimize.NelderMead{}
 	method.Shrink = 0.95
@@ -472,6 +531,80 @@ func trainMain4() {
 		fmt.Println(x)
 		return cost2(params, trainset)
 	}
+	result, err := optimize.Local(*problem, initX, nil, method)
+	if err != nil {
+		fmt.Println("Erro minimização:", err)
+	}
+	fmt.Println("###RESULT:", result)
+}
+func trainMain5() {
+	method := &optimize.CMAES{}
+	// initX := []float64{0.5, 1.5, 3.0, 2.0, 2.0, 3.0, 4.0, 3.5, 2.0, 3.0, 2.0, 4.5, 3.5, 2.5, 3.0, 3.5, 3.5, 3.0, 3.0, 3.5, 4.0, 4.0}
+	initX := []float64{0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0, 3.0, 0.0, 1.0}
+	problem := &optimize.Problem{}
+	problem.Func = func(x []float64) float64 {
+		penal := (x[0] * 1.0) + 3.0
+		metalDbest := x[1]
+		metalAlpha := x[2]
+		metalBeta := x[3]
+		repulsiveDbest := x[4]
+		repulsiveAlpha := x[5]
+		repulsiveBeta := x[6]
+		buriedDbest := x[7]
+		buriedAlpha := x[8]
+		buriedBeta := x[9]
+		hbondDbest := x[10]
+		hbondAlpha := x[11]
+		hbondBeta := x[12]
+		haDbest := x[13]
+		haAlpha := x[14]
+		haBeta := x[15]
+		harepDbest := x[16]
+		harepAlpha := x[17]
+		harepBeta := x[18]
+		npolarDbest := x[19]
+		npolarAlpha := x[20]
+		npolarBeta := x[21]
+
+		for k := range params.Inter {
+			tmp := params.Inter[k]
+			tmp.Penal = penal
+			if tmp.Type == "metal" {
+				tmp.Dbest = metalDbest
+				tmp.Alpha = metalAlpha
+				tmp.Beta = metalBeta
+			} else if tmp.Type == "repulsive" {
+				tmp.Dbest = repulsiveDbest
+				tmp.Alpha = repulsiveAlpha
+				tmp.Beta = repulsiveBeta
+			} else if tmp.Type == "buried" {
+				tmp.Dbest = buriedDbest
+				tmp.Alpha = buriedAlpha
+				tmp.Beta = buriedBeta
+			} else if tmp.Type == "hbond" {
+				tmp.Dbest = hbondDbest
+				tmp.Alpha = hbondAlpha
+				tmp.Beta = hbondBeta
+			} else if tmp.Type == "ha" {
+				tmp.Dbest = haDbest
+				tmp.Alpha = haAlpha
+				tmp.Beta = haBeta
+			} else if tmp.Type == "ha-repulsive" {
+				tmp.Dbest = harepDbest
+				tmp.Alpha = harepAlpha
+				tmp.Beta = harepBeta
+			} else if tmp.Type == "npolar" {
+				tmp.Dbest = npolarDbest
+				tmp.Alpha = npolarAlpha
+				tmp.Beta = npolarBeta
+			} else {
+				fmt.Println("Que tipo é esse?", tmp.Type)
+			}
+			params.Inter[k] = tmp
+		}
+		fmt.Println(x)
+		return cost3(params, trainset)
+	}
 
 	result, err := optimize.Local(*problem, initX, nil, method)
 	if err != nil {
@@ -482,7 +615,7 @@ func trainMain4() {
 
 func Train(method int) {
 	params = score.LoadParams("/home/jgcarvalho/gocode/src/bitbucket.org/jgcarvalho/zdd/params/INITPARAMS")
-	fn, err := filepath.Abs("./traindata/data.json")
+	fn, err := filepath.Abs("./traindata/data_teste.json")
 	if err != nil {
 		fmt.Println("Arquivo com dados de treinamento", err)
 		panic(err)
@@ -497,6 +630,8 @@ func Train(method int) {
 		trainMain3()
 	case 4:
 		trainMain4()
+	case 5:
+		trainMain5()
 	default:
 		fmt.Println("Method unselected")
 	}
