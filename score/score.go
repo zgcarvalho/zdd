@@ -100,15 +100,25 @@ func LoadParams(fn string) Parameters {
 
 func (prm Parameters) Score(p *protein.Protein, l *ligand.Ligand) float64 {
 	total := 0.0
+	minDist := math.MaxFloat64
+	maxAllowedDist := 8.0
+	d := 0.0
 	for _, la := range l.Atoms {
 		for _, lp := range p.Atoms {
 			c := lp.Name + "_" + la.Name
-			total += score(dist(lp.Coord, la.Coord), prm.Inter[c].Dbest, prm.Inter[c].Alpha, prm.Inter[c].Beta, prm.Inter[c].Penal, prm.Inter[c].Wa, prm.Inter[c].Wb, prm.Inter[c].Wpenal)
+			d = dist(lp.Coord, la.Coord)
+			total += score(d, prm.Inter[c].Dbest, prm.Inter[c].Alpha, prm.Inter[c].Beta, prm.Inter[c].Penal, prm.Inter[c].Wa, prm.Inter[c].Wb, prm.Inter[c].Wpenal)
+			if d < minDist {
+				minDist = d
+			}
 		}
 	}
-	total += prm.Wnp * math.Pow(float64(l.NPatoms), prm.Enp)
-	total += prm.Wp * math.Pow(float64(l.Patoms), prm.Ep)
-	total += prm.Wrb * math.Pow(float64(l.RotBonds), prm.Erb)
-	total += prm.C
+	if minDist > maxAllowedDist {
+		total += (minDist - maxAllowedDist) * 10.0
+	}
+	// total += prm.Wnp * math.Pow(float64(l.NPatoms), prm.Enp)
+	// total += prm.Wp * math.Pow(float64(l.Patoms), prm.Ep)
+	// total += prm.Wrb * math.Pow(float64(l.RotBonds), prm.Erb)
+	// total += prm.C
 	return total
 }

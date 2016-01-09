@@ -2,6 +2,7 @@ package ligand
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"math"
@@ -13,12 +14,12 @@ import (
 )
 
 type Ligand struct {
-	Name     string
-	Atoms    []atom.Atom
-	Angles   [3]float64
-	NPatoms  int
-	Patoms   int
-	RotBonds int
+	Name   string
+	Atoms  []atom.Atom
+	Angles [3]float64
+	// NPatoms  int
+	// Patoms   int
+	// RotBonds int
 }
 
 func (l Ligand) Center() [3]float64 {
@@ -112,6 +113,17 @@ func (l *Ligand) Move(x, y, z, a, b, c float64) {
 	// l.spin(a, b, c)
 }
 
+func (l Ligand) SavePDB(fn string) {
+	// f, err := os.Open(fn)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	for i := 0; i < len(l.Atoms); i++ {
+		fmt.Printf("HETATM%5d  O2  LIG L 1      %8.3f%8.3f%8.3f\n", i+1, l.Atoms[i].Coord[0], l.Atoms[i].Coord[1], l.Atoms[i].Coord[2])
+	}
+
+}
+
 func LoadMol2(fn string) Ligand {
 	f, err := os.Open(fn)
 	if err != nil {
@@ -161,6 +173,7 @@ func LoadMol2(fn string) Ligand {
 		}
 	}
 
-	return Ligand{fn, atoms, [3]float64{0.0, 0.0, 0.0}, npAtoms, pAtoms, 0}
+	// return Ligand{fn, atoms, [3]float64{0.0, 0.0, 0.0}, npAtoms, pAtoms, 0}
+	return Ligand{fn, atoms, [3]float64{0.0, 0.0, 0.0}}
 	// fmt.Println(atoms)
 }
